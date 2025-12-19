@@ -3,88 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="LOKA PRO">
     <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=L&background=1a73e8&color=fff&size=512">
-
     <title>LOKA PRO</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary: #1a73e8; --dark: #0a0a0a; --card: #1c1c1e; }
-        body { 
-            margin: 0; 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: var(--dark); 
-            color: white; 
-            overflow: hidden;
-            height: 100vh;
-            overscroll-behavior-y: contain; /* منع سحب الصفحة للأسفل */
-        }
+        :root { --primary: #1a73e8; --bg: #000; --card: #1c1c1e; --accent: #ffd700; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: white; overflow: hidden; height: 100vh; }
         
-        /* مراعاة منطقة الساعة والكاميرا في الأيفون */
-        .main-header { padding: env(safe-area-inset-top) 20px 20px; text-align: center; }
-        .logo { font-size: 35px; font-weight: bold; color: var(--primary); margin-top: 10px; }
-        .logo span { background: var(--primary); color: white; padding: 2px 8px; border-radius: 5px; font-size: 14px; }
+        .screen { position: absolute; inset: 0; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: var(--bg); display: flex; flex-direction: column; z-index: 10; }
+        .hidden { transform: translateX(100%); opacity: 0; z-index: 1; }
         
-        .main-menu { display: grid; gap: 15px; padding: 20px; }
-        .menu-item { background: var(--card); padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 15px; font-size: 20px; border: 1px solid #333; transition: 0.3s; }
-        .menu-item:active { background: #2c2c2e; transform: scale(0.98); }
+        /* Header */
+        .header { padding: env(safe-area-inset-top) 20px 20px; text-align: center; background: linear-gradient(to bottom, #1a73e833, transparent); }
+        .logo { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+        .logo span { color: var(--primary); }
 
-        #map { height: 100vh; width: 100%; }
-        .status-card { position: absolute; bottom: calc(30px + env(safe-area-inset-bottom)); left: 15px; right: 15px; background: var(--card); padding: 20px; border-radius: 20px; z-index: 1000; border: 1px solid #333; }
-        
-        .screen { height: 100vh; width: 100vw; transition: 0.5s ease; position: absolute; top:0; left:0; }
-        .hidden { transform: translateX(100%); opacity: 0; }
-        
-        .btn-cancel { width: 100%; background: none; border: none; color: #ff3b30; margin-top: 15px; font-size: 16px; }
+        /* Auth Screen */
+        .auth-box { padding: 30px; margin-top: auto; background: var(--card); border-top-left-radius: 30px; border-top-right-radius: 30px; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #2c2c2e; color: white; margin-bottom: 15px; font-size: 16px; text-align: center; }
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); margin-top: 10px; }
+
+        /* Main Menu */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; flex: 1; overflow-y: auto; }
+        .service-card { background: var(--card); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #2c2c2e; position: relative; }
+        .service-card i { font-size: 30px; display: block; margin-bottom: 10px; }
+        .badge { position: absolute; top: 10px; right: 10px; background: #34c759; font-size: 10px; padding: 2px 6px; border-radius: 5px; }
+
+        /* Map & Booking */
+        #map { flex: 1; width: 100%; }
+        .booking-panel { background: var(--card); padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); border-top: 1px solid #333; }
+        .deposit-notice { background: #ffd7001a; border: 1px dashed var(--accent); color: var(--accent); padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 15px; }
+
+        /* Captain Dashboard */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .stat-card { background: #2c2c2e; padding: 15px; border-radius: 15px; text-align: center; }
+        .stat-val { display: block; font-size: 20px; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div id="home" class="screen">
-        <div class="main-header">
+    <div id="screen-auth" class="screen">
+        <div class="header">
             <div class="logo">LOKA <span>PRO</span></div>
-            <p style="color: #888;">خدمات السطحات والنقل في جازان</p>
+            <p>منصة النقل والخدمات الذكية</p>
         </div>
-        <div class="main-menu">
-            <div class="menu-item" onclick="goToMap('سطحة')">🏎️ <span>أقرب سطحة</span></div>
-            <div class="menu-item" onclick="goToMap('تريلة')">🚛 <span>أقرب تريلة</span></div>
-            <div class="menu-item" onclick="goToMap('دينا')">🚚 <span>نقل عفش</span></div>
+        <div style="padding: 20px; text-align: center; color: #888;">أهلاً بك.. سجل دخولك للبدء</div>
+        <div class="auth-box">
+            <input type="tel" placeholder="رقم الجوال (05xxxxxxx)">
+            <input type="password" placeholder="كلمة المرور أو رقم الهوية">
+            <button class="btn btn-primary" onclick="showScreen('screen-home')">دخول كزبون</button>
+            <button class="btn btn-outline" onclick="showScreen('screen-captain')">دخول ككابتن (شريك)</button>
         </div>
     </div>
 
-    <div id="map-screen" class="screen hidden">
-        <div id="map"></div>
-        <div class="status-card">
-            <div id="searching" style="display: flex; align-items: center; gap: 10px;">
-                <div style="width:10px; height:10px; background:var(--primary); border-radius:50%; animation: pulse 1s infinite;"></div>
-                <span>جاري البحث عن كابتن في جازان...</span>
-            </div>
-            <button class="btn-cancel" onclick="location.reload()">إلغاء الطلب</button>
+    <div id="screen-home" class="screen hidden">
+        <div class="header">
+            <div class="logo">LOKA <span>PRO</span></div>
         </div>
+        <div class="menu-grid">
+            <div class="service-card" onclick="openMap('سطحة')"><i>🏎️</i>سطحة سريعة</div>
+            <div class="service-card" onclick="openMap('مياه')"><i>💧</i>وايت مياه</div>
+            <div class="service-card" onclick="openMap('عفش')"><i>📦</i>نقل عفش</div>
+            <div class="service-card" onclick="openMap('يوميات')"><span class="badge">جديد</span><i>🏪</i>مستلزمات</div>
+        </div>
+    </div>
+
+    <div id="screen-map" class="screen hidden">
+        <div id="map"></div>
+        <div class="booking-panel">
+            <div id="service-info" style="font-weight: bold; margin-bottom: 5px;">طلب خدمة: سطحة</div>
+            <div class="deposit-notice">
+                ⚠️ يتطلب هذا الطلب عربون بقيمة <b>15 ريال</b> (مستردة عند الإلغاء قبل تحرك الكابتن، ومحسومة للكابتن في حال وصوله للموقع).
+            </div>
+            <button class="btn btn-primary" onclick="confirmOrder()">تأكيد الطلب ودفع العربون</button>
+            <button class="btn btn-outline" style="border-color: #ff3b30; color: #ff3b30;" onclick="showScreen('screen-home')">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="screen-captain" class="screen hidden">
+        <div class="header">
+            <div class="logo">LOKA <span>PRO</span> <small style="font-size: 12px; color: #34c759;">كابتن</small></div>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-card"><span class="stat-val">4.9 ⭐</span>تقييمك</div>
+            <div class="stat-card"><span class="stat-val">120</span>طلبات مقبولة</div>
+            <div class="stat-card"><span class="stat-val">3</span>مرفوض (سعر)</div>
+            <div class="stat-card"><span class="stat-val">250 SR</span>عربونات محصلة</div>
+        </div>
+        <div style="padding: 20px;">
+            <div style="background: #1c1c1e; padding: 20px; border-radius: 20px; border-left: 4px solid #34c759;">
+                <h4 style="margin: 0;">أنت الآن: متصل</h4>
+                <p style="font-size: 12px; color: #888;">بانتظار أقرب طلب منك في جازان...</p>
+            </div>
+        </div>
+        <button class="btn btn-outline" onclick="showScreen('screen-auth')" style="margin: 20px; width: auto;">تسجيل خروج</button>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        function goToMap(type) {
-            document.getElementById('home').classList.add('hidden');
-            document.getElementById('map-screen').classList.remove('hidden');
-            
-            // تشغيل الخريطة على إحداثيات جازان
-            let map = L.map('map', {zoomControl: false}).setView([16.8892, 42.5511], 13);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-            
-            // إضافة ماركر وهمي للكابتن بعد 3 ثواني
-            setTimeout(() => {
-                L.marker([16.8950, 42.5600]).addTo(map).bindPopup("الكابتن قادم إليك").openPopup();
-                document.getElementById('searching').innerHTML = "✅ تم العثور على كابتن قريب!";
-            }, 3000);
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        let map;
+        function openMap(type) {
+            showScreen('screen-map');
+            document.getElementById('service-info').innerText = "طلب خدمة: " + type;
+            if(!map) {
+                map = L.map('map', {zoomControl: false}).setView([16.8892, 42.5511], 13);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            }
+        }
+
+        function confirmOrder() {
+            alert("تم خصم العربون وجاري إرسال طلبك لأقرب كابتن.. سيتم فتح الدردشة فور القبول.");
         }
     </script>
-    <style>
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-    </style>
 </body>
 </html>
