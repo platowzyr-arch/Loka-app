@@ -2,45 +2,40 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LOKA PRO - Jazan</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        :root { --primary: #1a73e8; --dark: #0a0a0a; --card: #1c1c1e; --accent: #34c759; }
-        body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: var(--dark); color: white; overflow: hidden; }
-        
-        .screen { height: 100vh; width: 100vw; transition: 0.5s ease; position: absolute; top:0; left:0; }
-        .hidden { transform: translateX(100%); opacity: 0; }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LOKA PRO">
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=L&background=1a73e8&color=fff&size=512">
 
-        /* الهيدر والقائمة */
-        .main-header { padding: 60px 20px 20px; text-align: center; }
-        .logo { font-size: 35px; font-weight: bold; color: var(--primary); }
-        .logo span { background: var(--primary); color: white; padding: 2px 8px; border-radius: 5px; font-size: 14px; margin-right: 5px; }
+    <title>LOKA PRO</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --primary: #1a73e8; --dark: #0a0a0a; --card: #1c1c1e; }
+        body { 
+            margin: 0; 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--dark); 
+            color: white; 
+            overflow: hidden;
+            height: 100vh;
+            /* منع السحب لأسفل لتحديث الصفحة داخل التطبيق */
+            overscroll-behavior-y: contain;
+        }
+        
+        /* تصميم يراعي منطقة النوتش في الأيفون */
+        .main-header { padding: env(safe-area-inset-top) 20px 20px; text-align: center; }
+        .logo { font-size: 35px; font-weight: bold; color: var(--primary); margin-top: 20px; }
         
         .main-menu { display: grid; gap: 15px; padding: 20px; }
         .menu-item { background: var(--card); padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 15px; font-size: 20px; border: 1px solid #333; }
 
-        /* الخريطة */
         #map { height: 100vh; width: 100%; }
-        .status-card { position: absolute; bottom: 30px; left: 15px; right: 15px; background: var(--card); padding: 20px; border-radius: 20px; z-index: 1000; border: 1px solid #333; }
+        .status-card { position: absolute; bottom: calc(30px + env(safe-area-inset-bottom)); left: 15px; right: 15px; background: var(--card); padding: 20px; border-radius: 20px; z-index: 1000; }
         
-        /* تأثير النبض */
-        .pulse { width: 12px; height: 12px; background: var(--primary); border-radius: 50%; position: relative; display: inline-block; margin-left: 10px; }
-        .pulse::after { content: ""; position: absolute; width: 100%; height: 100%; background: var(--primary); border-radius: 50%; animation: pulse-ani 1.5s infinite; }
-        @keyframes pulse-ani { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(4); opacity: 0; } }
-
-        /* الدردشة */
-        .chat-view { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: var(--dark); z-index: 2000; transition: 0.4s; display: flex; flex-direction: column; }
-        .chat-view.open { right: 0; }
-        .chat-header { padding: 20px; background: var(--card); display: flex; justify-content: space-between; align-items: center; }
-        .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; }
-        .msg.user { background: var(--primary); align-self: flex-start; }
-        .msg.bot { background: #2c2c2e; align-self: flex-end; }
-        
-        .chat-input { padding: 20px; background: var(--card); display: flex; gap: 10px; }
-        .chat-input input { flex: 1; background: #2c2c2e; border: none; color: white; padding: 12px; border-radius: 10px; }
+        .screen { height: 100vh; width: 100vw; transition: 0.5s ease; position: absolute; top:0; left:0; }
+        .hidden { transform: translateX(100%); opacity: 0; }
     </style>
 </head>
 <body>
@@ -48,79 +43,29 @@
     <div id="home" class="screen">
         <div class="main-header">
             <div class="logo">LOKA <span>PRO</span></div>
-            <p style="color: #888;">خدمات النقل والسطحات في جازان</p>
+            <p style="color: #888;">خدمات النقل في جازان</p>
         </div>
         <div class="main-menu">
-            <div class="menu-item" onclick="goToMap('تريلة')">🚛 <span>أقرب تريلة</span></div>
-            <div class="menu-item" onclick="goToMap('سطحة')">🏎️ <span>أقرب سطحة</span></div>
-            <div class="menu-item" onclick="goToMap('دينا')">🚚 <span>نقل عفش</span></div>
+            <div class="menu-item" onclick="goToMap()">🚛 <span>أطلب أقرب خدمة</span></div>
+            <div class="menu-item" onclick="alert('قريباً')">📦 <span>طلباتي</span></div>
         </div>
     </div>
 
     <div id="map-screen" class="screen hidden">
         <div id="map"></div>
         <div class="status-card">
-            <div id="searching">
-                <div class="pulse"></div> <span>جاري البحث عن أقرب خدمة في جازان...</span>
-            </div>
-            <div id="found" style="display:none;">
-                <div style="display:flex; align-items:center; gap:15px;" onclick="openChat()">
-                    <img src="https://ui-avatars.com/api/?name=Driver&background=1a73e8&color=fff" width="45" style="border-radius:50%">
-                    <div>
-                        <h4 style="margin:0">كابتن أحمد</h4>
-                        <small style="color:var(--accent)">متصل - على بعد 2 كم</small>
-                    </div>
-                    <button style="margin-right:auto; background:var(--primary); border:none; color:white; padding:8px 15px; border-radius:10px;">دردشة</button>
-                </div>
-            </div>
+            <div id="searching">جاري البحث عن كابتن...</div>
             <button onclick="location.reload()" style="width:100%; background:none; border:none; color:red; margin-top:15px;">إلغاء</button>
         </div>
     </div>
 
-    <div id="chat" class="chat-view">
-        <div class="chat-header">
-            <span onclick="closeChat()">✕ إغلاق</span>
-            <span>المحادثة</span>
-            <div style="width:50px"></div>
-        </div>
-        <div class="messages" id="msg-box">
-            <div class="msg bot">مرحباً، أنا متواجد في جازان حالياً. كيف أخدمك؟</div>
-        </div>
-        <div class="chat-input">
-            <input type="text" id="chat-in" placeholder="اكتب هنا...">
-            <button onclick="sendMsg()" style="background:var(--primary); border:none; color:white; padding:10px 20px; border-radius:10px;">إرسال</button>
-        </div>
-    </div>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        let map;
-        function goToMap(type) {
+        function goToMap() {
             document.getElementById('home').classList.add('hidden');
             document.getElementById('map-screen').classList.remove('hidden');
-            
-            if(!map) {
-                map = L.map('map', {zoomControl: false}).setView([16.8892, 42.5511], 13);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-            }
-
-            setTimeout(() => {
-                document.getElementById('searching').style.display = 'none';
-                document.getElementById('found').style.display = 'block';
-                L.marker([16.8950, 42.5600]).addTo(map).bindPopup("الكابتن هنا").openPopup();
-            }, 3000);
-        }
-
-        function openChat() { document.getElementById('chat').classList.add('open'); }
-        function closeChat() { document.getElementById('chat').classList.remove('open'); }
-
-        function sendMsg() {
-            let i = document.getElementById('chat-in');
-            if(!i.value) return;
-            document.getElementById('msg-box').innerHTML += `<div class="msg user">${i.value}</div>`;
-            i.value = "";
-            setTimeout(() => {
-                document.getElementById('msg-box').innerHTML += `<div class="msg bot">أبشر، ثواني وأكون عندك.</div>`;
-            }, 1000);
+            let map = L.map('map', {zoomControl: false}).setView([16.8892, 42.5511], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
         }
     </script>
 </body>
